@@ -10,6 +10,7 @@ struct wleird_subsurface {
 	struct wl_subsurface *wl_subsurface;
 };
 
+
 static struct wl_subcompositor *subcompositor = NULL;
 
 static struct wleird_toplevel toplevel = {0};
@@ -20,6 +21,7 @@ size_t subsurfaces_len = sizeof(subsurfaces) / sizeof(subsurfaces[0]);
 static struct wl_surface *current_surface = NULL;
 static struct wleird_subsurface *current_subsurface = NULL;
 static struct wleird_subsurface *pressed_subsurface = NULL;
+
 
 static void subsurface_init(struct wleird_subsurface *subsurface,
 		struct wl_surface *parent) {

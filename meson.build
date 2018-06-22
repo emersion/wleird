@@ -22,18 +22,20 @@ wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 
 subdir('protocol')
 
-executable(
-	'subsurfaces',
-	files([
+lib_client = static_library(
+	'client',
+	files(
 		'client.c',
 		'pool-buffer.c',
-		'subsurfaces.c',
-	]),
-	dependencies: [
-		cairo,
-		client_protos,
-		wayland_client,
-	],
-	include_directories: [wleird_inc],
+	),
+	include_directories: wleird_inc,
+	dependencies: [cairo, client_protos, wayland_client],
+)
+
+executable(
+	'subsurfaces',
+	files('subsurfaces.c'),
+	link_with: lib_client,
+	include_directories: wleird_inc,
 	install: true,
 )
