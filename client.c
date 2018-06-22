@@ -8,6 +8,13 @@ struct wl_shm *shm = NULL;
 struct wl_compositor *compositor = NULL;
 struct xdg_wm_base *wm_base = NULL;
 
+struct wl_pointer *pointer = NULL;
+
+void noop() {
+	// This space is intentionally left blank
+}
+
+
 void surface_render(struct wleird_surface *surface) {
 	struct pool_buffer *buffer = get_next_buffer(shm, surface->buffers,
 		surface->width, surface->height);
@@ -79,6 +86,22 @@ void toplevel_init(struct wleird_toplevel *toplevel) {
 }
 
 
+static void seat_handle_capabilities(void *data, struct wl_seat *seat,
+		uint32_t capabilities) {
+	if (capabilities & WL_SEAT_CAPABILITY_POINTER) {
+		// This client isn't multiseat aware for the sake of simplicity
+		if (pointer != NULL) {
+			return;
+		}
+		pointer = wl_seat_get_pointer(seat);
+	}
+}
+
+static const struct wl_seat_listener seat_listener = {
+	.capabilities = seat_handle_capabilities,
+};
+
+
 static void handle_global(void *data, struct wl_registry *registry,
 		uint32_t name, const char *interface, uint32_t version) {
 	if (strcmp(interface, wl_shm_interface.name) == 0) {
@@ -88,6 +111,10 @@ static void handle_global(void *data, struct wl_registry *registry,
 			&wl_compositor_interface, 4);
 	} else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
 		wm_base = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
+	} else if (strcmp(interface, wl_seat_interface.name) == 0) {
+		struct wl_seat *seat =
+			wl_registry_bind(registry, name, &wl_seat_interface, 1);
+		wl_seat_add_listener(seat, &seat_listener, NULL);
 	}
 }
 
