@@ -22,6 +22,8 @@ wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 
 subdir('protocol')
 
+wleird_deps = [cairo, client_protos, wayland_client]
+
 lib_client = static_library(
 	'client',
 	files(
@@ -29,7 +31,16 @@ lib_client = static_library(
 		'pool-buffer.c',
 	),
 	include_directories: wleird_inc,
-	dependencies: [cairo, client_protos, wayland_client],
+	dependencies: wleird_deps,
+)
+
+executable(
+	'resizor',
+	files('resizor.c'),
+	link_with: lib_client,
+	include_directories: wleird_inc,
+	dependencies: wleird_deps,
+	install: true,
 )
 
 executable(
@@ -37,5 +48,6 @@ executable(
 	files('subsurfaces.c'),
 	link_with: lib_client,
 	include_directories: wleird_inc,
+	dependencies: wleird_deps,
 	install: true,
 )

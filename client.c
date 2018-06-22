@@ -18,17 +18,24 @@ void noop() {
 void surface_render(struct wleird_surface *surface) {
 	struct pool_buffer *buffer = get_next_buffer(shm, surface->buffers,
 		surface->width, surface->height);
+	if (buffer == NULL) {
+		fprintf(stderr, "failed to obtain buffer\n");
+		return;
+	}
+
 	cairo_t *cairo = buffer->cairo;
 
 	float *color = surface->color;
 	cairo_set_source_rgba(cairo, color[0], color[1], color[2], color[3]);
 	cairo_paint(cairo);
 
-	wl_surface_attach(surface->wl_surface, buffer->buffer, 0, 0);
+	wl_surface_attach(surface->wl_surface, buffer->buffer,
+		surface->attach_x, surface->attach_y);
 	wl_surface_damage(surface->wl_surface, 0, 0,
 		surface->width, surface->height);
 	wl_surface_commit(surface->wl_surface);
 	buffer->busy = true;
+	surface->attach_x = surface->attach_y = 0;
 }
 
 void surface_init(struct wleird_surface *surface) {

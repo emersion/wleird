@@ -22,6 +22,7 @@ struct wleird_surface {
 	int width, height;
 	struct pool_buffer buffers[2];
 
+	int attach_x, attach_y;
 	float color[4];
 };
 
