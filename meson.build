@@ -23,10 +23,11 @@ wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 subdir('protocol')
 
 executable(
-	'client',
+	'subsurfaces',
 	files([
-		'pool-buffer.c',
 		'client.c',
+		'pool-buffer.c',
+		'subsurfaces.c',
 	]),
 	dependencies: [
 		cairo,
