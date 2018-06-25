@@ -31,7 +31,7 @@ void surface_render(struct wleird_surface *surface) {
 
 	wl_surface_attach(surface->wl_surface, buffer->buffer,
 		surface->attach_x, surface->attach_y);
-	wl_surface_damage(surface->wl_surface, 0, 0,
+	wl_surface_damage_buffer(surface->wl_surface, 0, 0,
 		surface->width, surface->height);
 	wl_surface_commit(surface->wl_surface);
 	buffer->busy = true;
