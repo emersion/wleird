@@ -35,6 +35,15 @@ lib_client = static_library(
 )
 
 executable(
+	'cursor',
+	files('cursor.c'),
+	link_with: lib_client,
+	include_directories: wleird_inc,
+	dependencies: wleird_deps,
+	install: true,
+)
+
+executable(
 	'resizor',
 	files('resizor.c'),
 	link_with: lib_client,
