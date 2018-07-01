@@ -13,7 +13,9 @@ static bool inversed = false;
 static void pointer_handle_enter(void *data, struct wl_pointer *wl_pointer,
 		uint32_t serial, struct wl_surface *surface,
 		wl_fixed_t surface_x, wl_fixed_t surface_y) {
-	wl_pointer_set_cursor(wl_pointer, serial, cursor_surface.wl_surface, 0, 0);
+	int hotspot = inversed ? cursor_size : 0;
+	wl_pointer_set_cursor(wl_pointer, serial, cursor_surface.wl_surface,
+		hotspot, hotspot);
 }
 
 static void pointer_handle_leave(void *data, struct wl_pointer *wl_pointer,
