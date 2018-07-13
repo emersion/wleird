@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
 	surface_init(&cursor_surface);
 	cursor_surface.width = cursor_surface.height = cursor_size;
-	float cursor_color[4] = {1, 0, 0, 1};
+	float cursor_color[4] = {1, 0, 0, 0.5};
 	memcpy(cursor_surface.color, cursor_color, sizeof(float[4]));
 	surface_render(&cursor_surface);
 
