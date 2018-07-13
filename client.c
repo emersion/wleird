@@ -26,8 +26,11 @@ void surface_render(struct wleird_surface *surface) {
 	cairo_t *cairo = buffer->cairo;
 
 	float *color = surface->color;
-	cairo_set_source_rgba(cairo, color[0], color[1], color[2], color[3]);
+    cairo_save(cairo);
+    cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+    cairo_set_source_rgba(cairo, color[0], color[1], color[2], color[3]);
 	cairo_paint(cairo);
+    cairo_restore(cairo);
 
 	wl_surface_attach(surface->wl_surface, buffer->buffer,
 		surface->attach_x, surface->attach_y);
