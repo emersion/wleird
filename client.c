@@ -26,11 +26,11 @@ void surface_render(struct wleird_surface *surface) {
 	cairo_t *cairo = buffer->cairo;
 
 	float *color = surface->color;
-    cairo_save(cairo);
-    cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-    cairo_set_source_rgba(cairo, color[0], color[1], color[2], color[3]);
+	cairo_save(cairo);
+	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+	cairo_set_source_rgba(cairo, color[0], color[1], color[2], color[3]);
 	cairo_paint(cairo);
-    cairo_restore(cairo);
+	cairo_restore(cairo);
 
 	wl_surface_attach(surface->wl_surface, buffer->buffer,
 		surface->attach_x, surface->attach_y);
@@ -48,7 +48,7 @@ void surface_init(struct wleird_surface *surface) {
 }
 
 
-static void xdg_surface_handle_configure(void *data,
+void default_xdg_surface_handle_configure(void *data,
 		struct xdg_surface *xdg_surface, uint32_t serial) {
 	struct wleird_toplevel *toplevel = data;
 
@@ -56,8 +56,8 @@ static void xdg_surface_handle_configure(void *data,
 	surface_render(&toplevel->surface);
 }
 
-static const struct xdg_surface_listener xdg_surface_listener = {
-	.configure = xdg_surface_handle_configure,
+struct xdg_surface_listener xdg_surface_listener = {
+	.configure = default_xdg_surface_handle_configure,
 };
 
 static void xdg_toplevel_handle_configure(void *data,
@@ -76,7 +76,7 @@ static void xdg_toplevel_handle_close(void *data,
 	exit(EXIT_SUCCESS);
 }
 
-static const struct xdg_toplevel_listener xdg_toplevel_listener = {
+struct xdg_toplevel_listener xdg_toplevel_listener = {
 	.configure = xdg_toplevel_handle_configure,
 	.close = xdg_toplevel_handle_close,
 };

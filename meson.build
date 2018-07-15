@@ -18,6 +18,7 @@ wleird_inc = include_directories('include')
 
 cairo = dependency('cairo')
 wayland_client = dependency('wayland-client')
+wayland_server = dependency('wayland-server')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 
 subdir('protocol')
@@ -40,7 +41,6 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
-	install: true,
 )
 
 executable(
@@ -49,7 +49,6 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
-	install: true,
 )
 
 executable(
@@ -58,5 +57,12 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
-	install: true,
+)
+
+executable(
+	'unmap',
+	files('unmap.c'),
+	link_with: lib_client,
+	include_directories: wleird_inc,
+	dependencies: [wleird_deps, wayland_server],
 )

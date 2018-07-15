@@ -33,6 +33,9 @@ struct wleird_toplevel {
 	struct xdg_toplevel *xdg_toplevel;
 };
 
+extern struct xdg_surface_listener xdg_surface_listener;
+extern struct xdg_toplevel_listener xdg_toplevel_listener;
+
 void noop();
 
 void registry_init(struct wl_display *display);
@@ -41,5 +44,8 @@ void surface_init(struct wleird_surface *surface);
 void surface_render(struct wleird_surface *surface);
 
 void toplevel_init(struct wleird_toplevel *toplevel);
+
+void default_xdg_surface_handle_configure(void *data,
+	struct xdg_surface *xdg_surface, uint32_t serial);
 
 #endif
