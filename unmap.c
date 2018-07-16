@@ -28,14 +28,10 @@ static int handle_display_readable(int fd, uint32_t mask, void *data) {
 	if (mask & WL_EVENT_HANGUP) {
 		exit(EXIT_FAILURE);
 	}
-	while (wl_display_prepare_read(display) != 0) {
-		wl_display_dispatch_pending(display);
-	}
-	if (wl_display_read_events(display) < 0) {
+	if (wl_display_dispatch(display) < 0) {
 		fprintf(stderr, "failed to read Wayland events\n");
 		exit(EXIT_FAILURE);
 	}
-	wl_display_dispatch_pending(display);
 	return 0;
 }
 
