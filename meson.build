@@ -41,6 +41,7 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
+	install: true,
 )
 
 executable(
@@ -49,6 +50,7 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
+	install: true,
 )
 
 executable(
@@ -57,6 +59,7 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: wleird_deps,
+	install: true,
 )
 
 executable(
@@ -65,4 +68,5 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: [wleird_deps, wayland_server],
+	install: true,
 )
