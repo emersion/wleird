@@ -20,6 +20,8 @@ cairo = dependency('cairo')
 wayland_client = dependency('wayland-client')
 wayland_server = dependency('wayland-server')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
+cc = meson.get_compiler('c')
+m = cc.find_library('m', required : false)
 
 subdir('protocol')
 
@@ -68,5 +70,14 @@ executable(
 	link_with: lib_client,
 	include_directories: wleird_inc,
 	dependencies: [wleird_deps, wayland_server],
+	install: true,
+)
+
+executable(
+	'damage-paint',
+	files('damage-paint.c'),
+	link_with: lib_client,
+	include_directories: wleird_inc,
+	dependencies: [wleird_deps, wayland_server, m],
 	install: true,
 )
