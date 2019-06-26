@@ -9,18 +9,6 @@ else
 	code_type = 'code'
 endif
 
-wayland_scanner_code = generator(
-	wayland_scanner,
-	output: '@BASENAME@-protocol.c',
-	arguments: [code_type, '@INPUT@', '@OUTPUT@'],
-)
-
-wayland_scanner_client = generator(
-	wayland_scanner,
-	output: '@BASENAME@-client-protocol.h',
-	arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
-)
-
 client_protocols = [
 	[wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
 ]
@@ -30,8 +18,18 @@ client_protos_headers = []
 
 foreach p : client_protocols
 	xml = join_paths(p)
-	client_protos_src += wayland_scanner_code.process(xml)
-	client_protos_headers += wayland_scanner_client.process(xml)
+	client_protos_src += custom_target(
+		xml.underscorify() + '_server_c',
+		input: xml,
+		output: '@BASENAME@-protocol.c',
+		command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
+	)
+	client_protos_headers += custom_target(
+		xml.underscorify() + '_server_h',
+		input: xml,
+		output: '@BASENAME@-client-protocol.h',
+		command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'],
+	)
 endforeach
 
 lib_client_protos = static_library(
