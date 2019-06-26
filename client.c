@@ -4,11 +4,15 @@
 #include <string.h>
 #include "client.h"
 
+#include "xdg-decoration-unstable-v1-client-protocol.h"
+
 struct wl_shm *shm = NULL;
 struct wl_compositor *compositor = NULL;
 struct xdg_wm_base *wm_base = NULL;
 
 struct wl_pointer *pointer = NULL;
+
+static struct zxdg_decoration_manager_v1 *decoration_manager = NULL;
 
 void noop() {
 	// This space is intentionally left blank
@@ -91,6 +95,14 @@ void toplevel_init(struct wleird_toplevel *toplevel) {
 	toplevel->xdg_toplevel = xdg_surface_get_toplevel(toplevel->xdg_surface);
 	xdg_toplevel_add_listener(toplevel->xdg_toplevel, &xdg_toplevel_listener,
 		toplevel);
+	if (decoration_manager) {
+		// Let the compositor do all the complicated window management
+		struct zxdg_toplevel_decoration_v1 *decoration =
+			zxdg_decoration_manager_v1_get_toplevel_decoration(
+				decoration_manager, toplevel->xdg_toplevel);
+		zxdg_toplevel_decoration_v1_set_mode(decoration,
+			ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+	}
 
 	wl_surface_commit(toplevel->surface.wl_surface);
 }
@@ -125,6 +137,8 @@ static void handle_global(void *data, struct wl_registry *registry,
 		struct wl_seat *seat =
 			wl_registry_bind(registry, name, &wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, NULL);
+	} else if (strcmp(interface, zxdg_decoration_manager_v1_interface.name) == 0) {
+		decoration_manager = wl_registry_bind(registry, name, &zxdg_decoration_manager_v1_interface, 1);
 	}
 }
 
