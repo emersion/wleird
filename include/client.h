@@ -13,6 +13,8 @@
 extern struct wl_shm *shm;
 extern struct wl_compositor *compositor;
 extern struct xdg_wm_base *wm_base;
+extern struct wl_data_device_manager *data_device_manager;
+extern struct wl_seat *seat;
 
 extern struct wl_pointer *pointer;
 

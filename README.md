@@ -7,6 +7,7 @@ meson build
 ninja -C build
 ```
 
+* `copy-fu`: implements a number of copy-paste behaviors
 * `cursor`: uses buffer position to update a cursor's hotspot
 * `damage-paint`: uses fine-grained damage requests to draw shapes
 * `resizor`: uses buffer position to initiate a client-side resize
