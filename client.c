@@ -9,7 +9,9 @@
 struct wl_shm *shm = NULL;
 struct wl_compositor *compositor = NULL;
 struct xdg_wm_base *wm_base = NULL;
+struct wl_data_device_manager *data_device_manager = NULL;
 
+struct wl_seat *seat = NULL;
 struct wl_pointer *pointer = NULL;
 
 static struct zxdg_decoration_manager_v1 *decoration_manager = NULL;
@@ -17,7 +19,6 @@ static struct zxdg_decoration_manager_v1 *decoration_manager = NULL;
 void noop() {
 	// This space is intentionally left blank
 }
-
 
 void surface_render(struct wleird_surface *surface) {
 	struct pool_buffer *buffer = get_next_buffer(shm, surface->buffers,
@@ -134,11 +135,14 @@ static void handle_global(void *data, struct wl_registry *registry,
 	} else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
 		wm_base = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
 	} else if (strcmp(interface, wl_seat_interface.name) == 0) {
-		struct wl_seat *seat =
-			wl_registry_bind(registry, name, &wl_seat_interface, 1);
+		seat = wl_registry_bind(registry, name, &wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, NULL);
+	} else if (strcmp(interface, wl_data_device_manager_interface.name) == 0) {
+		data_device_manager = wl_registry_bind(registry, name,
+			&wl_data_device_manager_interface, 3);
 	} else if (strcmp(interface, zxdg_decoration_manager_v1_interface.name) == 0) {
-		decoration_manager = wl_registry_bind(registry, name, &zxdg_decoration_manager_v1_interface, 1);
+		decoration_manager = wl_registry_bind(registry, name,
+			&zxdg_decoration_manager_v1_interface, 1);
 	}
 }
 

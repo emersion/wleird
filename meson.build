@@ -78,6 +78,15 @@ executable(
 	files('damage-paint.c'),
 	link_with: lib_client,
 	include_directories: wleird_inc,
-	dependencies: [wleird_deps, wayland_server, m],
+	dependencies: [wleird_deps, m],
 	install: true,
+)
+
+executable(
+        'copy-fu',
+        files('copy-fu.c'),
+        link_with: lib_client,
+        include_directories: wleird_inc,
+        dependencies: [wleird_deps, m],
+        install: true,
 )
