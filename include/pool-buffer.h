@@ -7,6 +7,8 @@
 #include <wayland-client.h>
 
 struct pool_buffer {
+	int poolfd;
+	struct wl_shm_pool *pool;
 	struct wl_buffer *buffer;
 	cairo_surface_t *surface;
 	cairo_t *cairo;
