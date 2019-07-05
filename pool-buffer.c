@@ -23,8 +23,8 @@ static bool set_cloexec(int fd) {
 	return true;
 }
 
-static int create_pool_file(size_t size, char **name) {
-	static const char template[] = "slurp-XXXXXX";
+int create_pool_file(size_t size) {
+	static const char template[] = "wleird-XXXXXX";
 	const char *path = getenv("XDG_RUNTIME_DIR");
 	if (path == NULL) {
 		fprintf(stderr, "XDG_RUNTIME_DIR is not set\n");
@@ -32,17 +32,22 @@ static int create_pool_file(size_t size, char **name) {
 	}
 
 	size_t name_size = strlen(template) + 1 + strlen(path) + 1;
-	*name = malloc(name_size);
-	if (*name == NULL) {
+	char *name = malloc(name_size);
+	if (name == NULL) {
 		fprintf(stderr, "allocation failed\n");
 		return -1;
 	}
-	snprintf(*name, name_size, "%s/%s", path, template);
+	snprintf(name, name_size, "%s/%s", path, template);
 
-	int fd = mkstemp(*name);
+	int fd = mkstemp(name);
 	if (fd < 0) {
+		free(name);
 		return -1;
 	}
+
+	// unlink asap; the file stays valid until all references close
+	unlink(name);
+	free(name);
 
 	if (!set_cloexec(fd)) {
 		close(fd);
@@ -66,37 +71,31 @@ static const struct wl_buffer_listener buffer_listener = {
 	.release = buffer_handle_release,
 };
 
+static const enum wl_shm_format wl_fmt = WL_SHM_FORMAT_ARGB8888;
+static const cairo_format_t cairo_fmt = CAIRO_FORMAT_ARGB32;
+
 static struct pool_buffer *create_buffer(struct wl_shm *shm,
 		struct pool_buffer *buf, int32_t width, int32_t height) {
-	const enum wl_shm_format wl_fmt = WL_SHM_FORMAT_ARGB8888;
-	const cairo_format_t cairo_fmt = CAIRO_FORMAT_ARGB32;
-
 	uint32_t stride = cairo_format_stride_for_width(cairo_fmt, width);
 	size_t size = stride * height;
 
 	void *data = NULL;
 	if (size > 0) {
-		char *name;
-		int fd = create_pool_file(size, &name);
-		if (fd == -1) {
+		buf->poolfd = create_pool_file(size);
+		if (buf->poolfd == -1) {
 			return NULL;
 		}
 
-		data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+		data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED,
+			buf->poolfd, 0);
 		if (data == MAP_FAILED) {
 			return NULL;
 		}
 
-		struct wl_shm_pool *pool = wl_shm_create_pool(shm, fd, size);
-		buf->buffer =
-			wl_shm_pool_create_buffer(pool, 0, width, height, stride, wl_fmt);
+		buf->pool = wl_shm_create_pool(shm, buf->poolfd, size);
+		buf->buffer = wl_shm_pool_create_buffer(buf->pool, 0,
+			width, height, stride, wl_fmt);
 		wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
-		wl_shm_pool_destroy(pool);
-
-		close(fd);
-		fd = -1;
-		unlink(name);
-		free(name);
 	}
 
 	buf->data = data;
@@ -109,20 +108,68 @@ static struct pool_buffer *create_buffer(struct wl_shm *shm,
 	return buf;
 }
 
-void finish_buffer(struct pool_buffer *buffer) {
-	if (buffer->buffer) {
-		wl_buffer_destroy(buffer->buffer);
+static void resize_buffer(struct pool_buffer *buf,
+		int32_t width, int32_t height) {
+	uint32_t stride = cairo_format_stride_for_width(cairo_fmt, width);
+	int32_t size = (int32_t)stride * height;
+
+	if (buf->cairo) {
+		cairo_destroy(buf->cairo);
+		buf->cairo = NULL;
 	}
-	if (buffer->cairo) {
-		cairo_destroy(buffer->cairo);
+	if (buf->surface) {
+		cairo_surface_destroy(buf->surface);
+		buf->surface = NULL;
 	}
-	if (buffer->surface) {
-		cairo_surface_destroy(buffer->surface);
+	if (buf->data) {
+		munmap(buf->data, buf->size);
+		buf->data = NULL;
 	}
-	if (buffer->data) {
-		munmap(buffer->data, buffer->size);
+
+	if (ftruncate(buf->poolfd, size) == -1) {
+		finish_buffer(buf);
+		return;
 	}
-	memset(buffer, 0, sizeof(struct pool_buffer));
+	void *data = NULL;
+	data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED,
+		buf->poolfd, 0);
+	if (data == MAP_FAILED) {
+		finish_buffer(buf);
+		return;
+	}
+
+	wl_buffer_destroy(buf->buffer);
+	wl_shm_pool_resize(buf->pool, size);
+	buf->buffer = wl_shm_pool_create_buffer(buf->pool, 0,
+		width, height, stride, wl_fmt);
+	wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
+
+	buf->size = size;
+	buf->width = width;
+	buf->height = height;
+	buf->surface = cairo_image_surface_create_for_data(data, cairo_fmt, width,
+		height, stride);
+	buf->cairo = cairo_create(buf->surface);
+}
+
+void finish_buffer(struct pool_buffer *buf) {
+	if (buf->pool) {
+		wl_shm_pool_destroy(buf->pool);
+	}
+	if (buf->buffer) {
+		wl_buffer_destroy(buf->buffer);
+	}
+	if (buf->cairo) {
+		cairo_destroy(buf->cairo);
+	}
+	if (buf->surface) {
+		cairo_surface_destroy(buf->surface);
+	}
+	if (buf->data) {
+		munmap(buf->data, buf->size);
+	}
+	close(buf->poolfd);
+	memset(buf, 0, sizeof(struct pool_buffer));
 }
 
 struct pool_buffer *get_next_buffer(struct wl_shm *shm,
@@ -138,8 +185,17 @@ struct pool_buffer *get_next_buffer(struct wl_shm *shm,
 		return NULL;
 	}
 
-	if (buffer->width != width || buffer->height != height) {
+	int buf_stride = cairo_format_stride_for_width(cairo_fmt, (int)buffer->width);
+	int stride = cairo_format_stride_for_width(cairo_fmt, (int)width);
+
+	int buf_size = buf_stride * (int)buffer->height;
+	int size = stride * (int)height;
+
+	if (buf_size > size) {
 		finish_buffer(buffer);
+	} else if (buf_size > 0 && buf_size < size) {
+		// resize, because wl_shm_pool_resize is underused by toolkits
+		resize_buffer(buffer, width, height);
 	}
 
 	if (!buffer->buffer) {
