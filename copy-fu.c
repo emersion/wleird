@@ -13,7 +13,7 @@
 
 enum copyfu_mode {
 	DEFAULT, CAT_RANDOM, BAD_SERIAL, ZERO_SINK, STEAL_SERIAL, RECV_FILE,
-	STEAL_SYNC, RECV_FLOOD, RECV_SOCKETPAIR
+	STEAL_SYNC, RECV_FLOOD, RECV_SOCKETPAIR, RECV_EPIPE
 };
 
 struct cli_option {
@@ -68,7 +68,8 @@ static const struct cli_option cli_options[] = {
 	{RECV_FILE, "recv-file", "Receive to paste_result.txt"},
 	{STEAL_SYNC, "steal-sync", "Periodically try the wl_display::sync serial"},
 	{RECV_FLOOD, "recv-flood", "Receive very many times to /dev/null"},
-	{RECV_SOCKETPAIR, "recv-sockpair", "Receive to a socketpair"}
+	{RECV_SOCKETPAIR, "recv-sockpair", "Receive to a socketpair"},
+	{RECV_EPIPE, "recv-epipe", "Receive to a readerless pipe"}
 };
 
 static enum copyfu_mode mode = DEFAULT;
@@ -239,7 +240,7 @@ static void data_device_data_offer(void *data,
 	wl_data_offer_add_listener(id, &data_offer_listener, NULL);
 }
 
-static void receive_offer(const char *mimetype, bool via_sockpair) {
+static void receive_offer(const char *mimetype, bool via_sockpair, bool send_unpaired) {
 	int32_t fds[2];
 	int ret = -1;
 	if (via_sockpair) {
@@ -252,6 +253,11 @@ static void receive_offer(const char *mimetype, bool via_sockpair) {
 		printf("Failed to create %s, %s",
 			via_sockpair ? "socketpair" : "pipe", strerror(errno));
 		return;
+	} else if (send_unpaired) {
+		printf("Receiving offer for %s, and closing read end\n", mimetype);
+		close(fds[0]);
+		wl_data_offer_receive(data_offer, mimetype, fds[1]);
+		close(fds[1]);
 	} else {
 		wl_data_offer_receive(data_offer, mimetype, fds[1]);
 		close(fds[1]);
@@ -261,7 +267,7 @@ static void receive_offer(const char *mimetype, bool via_sockpair) {
 			rtype = RECV_OCTET_STREAM;
 		}
 		add_set_fd(fds[0], SEND_NOT, rtype);
-		printf("Receiving offer for %s\n",mimetype);
+		printf("Receiving offer for %s\n", mimetype);
 	}
 }
 
@@ -277,9 +283,11 @@ static void data_device_selection(void *data,
 	struct mimetype_offer *offer = NULL;
 	wl_list_for_each(offer, &offer_list, link) {
 		if (mode == DEFAULT) {
-			receive_offer(offer->val, false);
+			receive_offer(offer->val, false, false);
 		} else if (mode == RECV_SOCKETPAIR) {
-			receive_offer(offer->val, true);
+			receive_offer(offer->val, true, false);
+		} else if (mode == RECV_EPIPE) {
+			receive_offer(offer->val, false, true);
 		} else if (mode == ZERO_SINK) {
 			printf("Receiving offer for %s, to /dev/null\n", offer->val);
 			wl_data_offer_receive(data_offer, offer->val, devnull);
