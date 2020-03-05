@@ -39,8 +39,19 @@ lib_client = static_library(
 )
 
 clients = {
+	'copy-fu': {
+		'src': 'copy-fu.c',
+		'deps': [math],
+	},
 	'cursor': {
 		'src': 'cursor.c',
+	},
+	'damage-paint': {
+		'src': 'damage-paint.c',
+		'deps': [math],
+	},
+	'frame-callback': {
+		'src': 'frame-callback.c',
 	},
 	'resizor': {
 		'src': 'resizor.c',
@@ -51,14 +62,6 @@ clients = {
 	'unmap': {
 		'src': 'unmap.c',
 		'deps': [wayland_server],
-	},
-	'damage-paint': {
-		'src': 'damage-paint.c',
-		'deps': [math],
-	},
-	'copy-fu': {
-		'src': 'copy-fu.c',
-		'deps': [math],
 	},
 }
 
