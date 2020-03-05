@@ -3,13 +3,15 @@ project(
 	'c',
 	version: '0.0.0',
 	license: 'MIT',
-	meson_version: '>=0.43.0',
+	meson_version: '>=0.47.0',
 	default_options: [
 		'c_std=c11',
 		'warning_level=2',
 		'werror=true',
 	],
 )
+
+cc = meson.get_compiler('c')
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
 add_project_arguments('-Wno-missing-braces', language: 'c')
@@ -20,8 +22,7 @@ cairo = dependency('cairo')
 wayland_client = dependency('wayland-client')
 wayland_server = dependency('wayland-server')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
-cc = meson.get_compiler('c')
-m = cc.find_library('m', required : false)
+math = cc.find_library('m', required: false)
 
 subdir('protocol')
 
@@ -37,56 +38,37 @@ lib_client = static_library(
 	dependencies: wleird_deps,
 )
 
-executable(
-	'cursor',
-	files('cursor.c'),
-	link_with: lib_client,
-	include_directories: wleird_inc,
-	dependencies: wleird_deps,
-	install: true,
-)
+clients = {
+	'cursor': {
+		'src': 'cursor.c',
+	},
+	'resizor': {
+		'src': 'resizor.c',
+	},
+	'subsurfaces': {
+		'src': 'subsurfaces.c',
+	},
+	'unmap': {
+		'src': 'unmap.c',
+		'deps': [wayland_server],
+	},
+	'damage-paint': {
+		'src': 'damage-paint.c',
+		'deps': [math],
+	},
+	'copy-fu': {
+		'src': 'copy-fu.c',
+		'deps': [math],
+	},
+}
 
-executable(
-	'resizor',
-	files('resizor.c'),
-	link_with: lib_client,
-	include_directories: wleird_inc,
-	dependencies: wleird_deps,
-	install: true,
-)
-
-executable(
-	'subsurfaces',
-	files('subsurfaces.c'),
-	link_with: lib_client,
-	include_directories: wleird_inc,
-	dependencies: wleird_deps,
-	install: true,
-)
-
-executable(
-	'unmap',
-	files('unmap.c'),
-	link_with: lib_client,
-	include_directories: wleird_inc,
-	dependencies: [wleird_deps, wayland_server],
-	install: true,
-)
-
-executable(
-	'damage-paint',
-	files('damage-paint.c'),
-	link_with: lib_client,
-	include_directories: wleird_inc,
-	dependencies: [wleird_deps, m],
-	install: true,
-)
-
-executable(
-        'copy-fu',
-        files('copy-fu.c'),
-        link_with: lib_client,
-        include_directories: wleird_inc,
-        dependencies: [wleird_deps, m],
-        install: true,
-)
+foreach name, client : clients
+	executable(
+		name,
+		files(client['src']),
+		link_with: lib_client,
+		include_directories: wleird_inc,
+		dependencies: [wleird_deps] + client.get('deps', []),
+		install: true,
+	)
+endforeach
