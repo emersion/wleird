@@ -4,7 +4,7 @@
 #include <string.h>
 #include "client.h"
 
-#include <wayland-server.h>
+#include <wayland-server-core.h>
 
 static struct wleird_toplevel toplevel = {0};
 struct wl_event_loop *loop = NULL;
