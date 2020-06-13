@@ -50,6 +50,10 @@ clients = {
 		'src': 'damage-paint.c',
 		'deps': [math],
 	},
+	'disobey-resize': {
+		'src': 'disobey-resize.c',
+		'deps': [math],
+	},
 	'frame-callback': {
 		'src': 'frame-callback.c',
 	},
