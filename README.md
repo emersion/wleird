@@ -12,6 +12,7 @@ ninja -C build
 * `damage-paint`: uses fine-grained damage requests to draw shapes
 * `frame-callback`: requests frame callbacks indefinitely
 * `resizor`: uses buffer position to initiate a client-side resize
+* `slow-ack-configure`: responds to configure events very slowly
 * `subsurfaces`: displays a bunch of subsurfaces and lets you reorder them
 * `unmap`: unmaps a buffer after displaying it
 

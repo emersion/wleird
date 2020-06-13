@@ -56,6 +56,9 @@ clients = {
 	'resizor': {
 		'src': 'resizor.c',
 	},
+	'slow-ack-configure': {
+		'src': 'slow-ack-configure.c',
+	},
 	'subsurfaces': {
 		'src': 'subsurfaces.c',
 	},
