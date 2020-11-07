@@ -15,6 +15,7 @@ ninja -C build
 * `resizor`: uses buffer position to initiate a client-side resize
 * `slow-ack-configure`: responds to configure events very slowly
 * `subsurfaces`: displays a bunch of subsurfaces and lets you reorder them
+* `surface-outputs`: prints on which outputs a surface is on
 * `unmap`: unmaps a buffer after displaying it
 
 ## License

@@ -66,6 +66,9 @@ clients = {
 	'subsurfaces': {
 		'src': 'subsurfaces.c',
 	},
+	'surface-outputs': {
+		'src': 'surface-outputs.c',
+	},
 	'unmap': {
 		'src': 'unmap.c',
 		'deps': [wayland_server],
