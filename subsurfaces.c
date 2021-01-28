@@ -18,9 +18,25 @@ static struct wleird_toplevel toplevel = {0};
 static struct wleird_subsurface subsurfaces[3] = {0};
 size_t subsurfaces_len = sizeof(subsurfaces) / sizeof(subsurfaces[0]);
 
+const char *subsurface_names[] = {
+	"red sub-surface",
+	"green sub-surface",
+	"blue sub-surface",
+};
+
 static struct wl_surface *current_surface = NULL;
 static struct wleird_subsurface *current_subsurface = NULL;
-static struct wleird_subsurface *pressed_subsurface = NULL;
+static struct wleird_subsurface *selected_subsurface = NULL;
+
+
+static const char *get_surface_name(struct wl_surface *surface) {
+	for (size_t i = 0; i < subsurfaces_len; ++i) {
+		if (surface == subsurfaces[i].surface.wl_surface) {
+			return subsurface_names[i];
+		}
+	}
+	return "main surface";
+}
 
 
 static void subsurface_init(struct wleird_subsurface *subsurface,
@@ -60,33 +76,43 @@ static void pointer_handle_motion(void *data, struct wl_pointer *wl_pointer,
 static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
 		uint32_t serial, uint32_t time, uint32_t button,
 		uint32_t button_state) {
-	switch (button_state) {
-	case WL_POINTER_BUTTON_STATE_PRESSED:
+	if (button_state != WL_POINTER_BUTTON_STATE_RELEASED) {
+		return;
+	}
+
+	if (selected_subsurface == NULL) {
 		if (current_subsurface == NULL) {
 			return;
 		}
-		pressed_subsurface = current_subsurface;
-		break;
-	case WL_POINTER_BUTTON_STATE_RELEASED:
-		if (pressed_subsurface == NULL || current_surface == NULL ||
-				pressed_subsurface == current_subsurface) {
+		fprintf(stderr, "Selected %s\n", get_surface_name(current_surface));
+		selected_subsurface = current_subsurface;
+	} else {
+		if (current_surface == NULL ||
+				selected_subsurface == current_subsurface) {
 			return;
 		}
 
+		const char *selected_name =
+			get_surface_name(selected_subsurface->surface.wl_surface);
+		const char *current_name = get_surface_name(current_surface);
+
 		switch (button) {
 		case BTN_LEFT:
-			wl_subsurface_place_above(pressed_subsurface->wl_subsurface,
+			fprintf(stderr, "Placing %s above %s\n",
+				selected_name, current_name);
+			wl_subsurface_place_above(selected_subsurface->wl_subsurface,
 				current_surface);
 			break;
 		case BTN_RIGHT:
-			wl_subsurface_place_below(pressed_subsurface->wl_subsurface,
+			fprintf(stderr, "Placing %s below %s\n",
+				selected_name, current_name);
+			wl_subsurface_place_below(selected_subsurface->wl_subsurface,
 				current_surface);
 			break;
 		}
 		wl_surface_commit(toplevel.surface.wl_surface);
 
-		pressed_subsurface = NULL;
-		break;
+		selected_subsurface = NULL;
 	}
 }
 
