@@ -57,6 +57,9 @@ clients = {
 	'frame-callback': {
 		'src': 'frame-callback.c',
 	},
+	'resize-loop': {
+		'src': 'resize-loop.c',
+	},
 	'resizor': {
 		'src': 'resizor.c',
 	},
