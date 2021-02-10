@@ -39,6 +39,10 @@ lib_client = static_library(
 )
 
 clients = {
+	'attach-delta-loop': {
+		'src': 'attach-delta-loop.c',
+		'deps': [math],
+	},
 	'copy-fu': {
 		'src': 'copy-fu.c',
 		'deps': [math],
