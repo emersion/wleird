@@ -67,6 +67,9 @@ clients = {
 	'resizor': {
 		'src': 'resizor.c',
 	},
+	'sigbus': {
+		'src': 'sigbus.c',
+	},
 	'slow-ack-configure': {
 		'src': 'slow-ack-configure.c',
 	},

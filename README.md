@@ -15,6 +15,7 @@ ninja -C build
 * `frame-callback`: requests frame callbacks indefinitely
 * `resize-loop`: resizes itself indefinitely
 * `resizor`: uses buffer position to initiate a client-side resize
+* `sigbus`: trigger SIGBUS in the compositor by shrinking a shm file
 * `slow-ack-configure`: responds to configure events very slowly
 * `subsurfaces`: displays a bunch of subsurfaces and lets you reorder them
 * `surface-outputs`: prints on which outputs a surface is on
