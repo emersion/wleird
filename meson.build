@@ -3,7 +3,7 @@ project(
 	'c',
 	version: '0.0.0',
 	license: 'MIT',
-	meson_version: '>=0.47.0',
+	meson_version: '>=0.49.0',
 	default_options: [
 		'c_std=c11',
 		'warning_level=2',
@@ -23,6 +23,7 @@ wayland_client = dependency('wayland-client')
 wayland_server = dependency('wayland-server')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 math = cc.find_library('m', required: false)
+gbm = dependency('gbm', disabler: true)
 
 subdir('protocol')
 
@@ -66,6 +67,10 @@ clients = {
 	},
 	'resizor': {
 		'src': 'resizor.c',
+	},
+	'resource-thief': {
+		'src': 'resource-thief.c',
+		'deps': [gbm],
 	},
 	'sigbus': {
 		'src': 'sigbus.c',
