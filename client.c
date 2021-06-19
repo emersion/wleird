@@ -124,6 +124,16 @@ static const struct wl_seat_listener seat_listener = {
 	.capabilities = seat_handle_capabilities,
 };
 
+static void wm_base_handle_ping(void *data, struct xdg_wm_base *xdg_wm_base,
+		uint32_t serial)
+{
+	xdg_wm_base_pong(xdg_wm_base, serial);
+}
+
+static const struct xdg_wm_base_listener wm_base_listener = {
+	.ping = wm_base_handle_ping,
+};
+
 
 static void handle_global(void *data, struct wl_registry *registry,
 		uint32_t name, const char *interface, uint32_t version) {
@@ -134,6 +144,7 @@ static void handle_global(void *data, struct wl_registry *registry,
 			&wl_compositor_interface, 4);
 	} else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
 		wm_base = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
+		xdg_wm_base_add_listener(wm_base, &wm_base_listener, NULL);
 	} else if (strcmp(interface, wl_seat_interface.name) == 0) {
 		seat = wl_registry_bind(registry, name, &wl_seat_interface, 1);
 		wl_seat_add_listener(seat, &seat_listener, NULL);
