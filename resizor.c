@@ -48,10 +48,10 @@ static void pointer_handle_motion(void *data, struct wl_pointer *wl_pointer,
 		toplevel.surface.width -= dwidth;
 		toplevel.surface.height -= dheight;
 		surface_render(&toplevel.surface);
-	}
 
-	pointer_state.last_x = pointer_state.x;
-	pointer_state.last_y = pointer_state.y;
+		pointer_state.last_x = pointer_state.x - dx;
+		pointer_state.last_y = pointer_state.y - dy;
+	}
 }
 
 static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
