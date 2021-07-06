@@ -4,6 +4,9 @@
 #include <string.h>
 #include "client.h"
 
+#define MIN_SIZE 50
+#define MAX_SIZE 1000
+
 static struct wleird_toplevel toplevel = {0};
 
 struct {
@@ -36,6 +39,19 @@ static void pointer_handle_motion(void *data, struct wl_pointer *wl_pointer,
 	if (pointer_state.resizing) {
 		int dwidth = pointer_state.x - pointer_state.last_x;
 		int dheight = pointer_state.y - pointer_state.last_y;
+		int next_width = toplevel.surface.width - dwidth;
+		int next_height = toplevel.surface.height - dheight;
+		if (next_width < MIN_SIZE) {
+			dwidth = toplevel.surface.width - MIN_SIZE;
+		} else if (next_width > MAX_SIZE) {
+			dwidth = toplevel.surface.width - MAX_SIZE;
+		}
+		if (next_height < MIN_SIZE) {
+			dheight = toplevel.surface.height - MIN_SIZE;
+		} else if (next_height > MAX_SIZE) {
+			dheight = toplevel.surface.height - MAX_SIZE;
+		}
+
 		int dx = dwidth, dy = dheight;
 
 		if (pointer_state.resizing == RESIZING_ANCHORED_TO_CENTER) {
