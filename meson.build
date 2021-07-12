@@ -62,6 +62,9 @@ clients = {
 	'frame-callback': {
 		'src': 'frame-callback.c',
 	},
+	'gamma-blend': {
+		'src': 'gamma-blend.c',
+	},
 	'resize-loop': {
 		'src': 'resize-loop.c',
 	},

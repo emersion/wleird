@@ -74,7 +74,7 @@ static const struct wl_buffer_listener buffer_listener = {
 static const enum wl_shm_format wl_fmt = WL_SHM_FORMAT_ARGB8888;
 static const cairo_format_t cairo_fmt = CAIRO_FORMAT_ARGB32;
 
-static struct pool_buffer *create_buffer(struct wl_shm *shm,
+struct pool_buffer *create_buffer(struct wl_shm *shm,
 		struct pool_buffer *buf, int32_t width, int32_t height) {
 	uint32_t stride = cairo_format_stride_for_width(cairo_fmt, width);
 	size_t size = stride * height;

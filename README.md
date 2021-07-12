@@ -13,6 +13,7 @@ ninja -C build
 * `damage-paint`: uses fine-grained damage requests to draw shapes
 * `disobey-resize`: submits buffers in a different size than configured
 * `frame-callback`: requests frame callbacks indefinitely
+* `gamma-blend`: makes the compositor perform alpha-blending with a subsurface
 * `resize-loop`: resizes itself indefinitely
 * `resizor`: uses buffer position to initiate a client-side resize
 * `resource-thief`: makes the compositor run out of (fd or memory) resources
