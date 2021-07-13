@@ -65,6 +65,9 @@ clients = {
 	'gamma-blend': {
 		'src': 'gamma-blend.c',
 	},
+	'grid-layer-surface': {
+		'src': 'grid-layer-surface.c',
+	},
 	'resize-loop': {
 		'src': 'resize-loop.c',
 	},
