@@ -2,6 +2,10 @@
 
 A collection of Wayland clients doing weird things, for compositor testing.
 
+Some of these clients are intentionally misusing protocols in ways that help
+reveal compositor behavior, and should not be seen as reference implementations
+for good Wayland clients.
+
 ```shell
 meson build
 ninja -C build
