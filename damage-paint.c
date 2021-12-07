@@ -66,6 +66,14 @@ static int randint(int max) {
 	return (int)((uint32_t)rand() % (uint32_t)max);
 }
 
+// damage_render paints a buffer entirely in a new color, and then only damages
+// certain parts of it. This reveals whether the compositor is currently
+// copying all buffer content or only the parts that have been damaged.
+//
+// Note that this is not correct usage of buffer damage, and is only done here
+// to reveal the behavior of the compositor. A compositor will sometimes need
+// to ignore the buffer damage and read the full buffer content, such as if an
+// obscured surface is unobscured.
 static void damage_render(struct wleird_surface *surface) {
 	struct pool_buffer *buffer = get_next_buffer(
 	    shm, surface->buffers, surface->width, surface->height);
