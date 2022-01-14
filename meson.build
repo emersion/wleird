@@ -95,7 +95,7 @@ clients = {
 
 foreach name, client : clients
 	executable(
-		name,
+		'wleird-' + name,
 		files(client['src']),
 		link_with: lib_client,
 		include_directories: wleird_inc,
