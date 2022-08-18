@@ -2,6 +2,10 @@
 
 A collection of Wayland clients doing weird things, for compositor testing.
 
+> ### ⚠️ Migrated to gitlab.freedesktop.org
+>
+> This project has [migrated to gitlab.freedesktop.org](https://gitlab.freedesktop.org/emersion/wleird).
+
 Some of these clients are intentionally misusing protocols in ways that help
 reveal compositor behavior, and should not be seen as reference implementations
 for good Wayland clients.
